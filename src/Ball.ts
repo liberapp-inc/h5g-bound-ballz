@@ -40,58 +40,66 @@ class Ball extends GameObject{
         // 移動処理
         this.shape.x += this.vx;
         this.shape.y += this.vy;
+        this.vx *= 0.99;
+        this.vy *= 0.99;
+        this.vy += this.radius * 0.01;
 
-        // BOXとの接触判定（一番近いもの）
+        // Targetとの接触判定（一番近いもの）
         let nearest = null;
-        let nd2 = 0;
-/*
-        Box.boxes.forEach( box => {
-            let dx = box.shape.x - this.shape.x;
-            let dy = box.shape.y - this.shape.y;
-            let dx2 = dx**2;
-            let dy2 = dy**2;
+        let ndd = 0;
+        Target.targets.forEach( target => {
+            let dx = target.shape.x - this.shape.x;
+            let dy = target.shape.y - this.shape.y;
+            let dd = dx**2 + dy**2;
 
             if( !nearest ){
-                let xr = box.sizeW * 0.5 + this.radius;
-                let yr = box.sizeH * 0.5 + this.radius;
-                if( dx2 < xr**2 && dy2 < yr**2 ){
-                    nearest = box;
-                    nd2 = dx2 + dy2;
+                let rr = (target.radius + this.radius) ** 2;
+                if( dd < rr ){
+                    nearest = target;
+                    ndd = dd;
                 }
             }
             else{
-                if( nd2 > dx2 + dy2 ){
-                    nearest = box;
-                    nd2 = dx2 + dy2;
+                if( ndd > dd ){
+                    nearest = target;
+                    ndd = dd;
                 }
             }
         });
 
+        // 反射
         if( nearest ){
-            let dx = nearest.shape.x - this.shape.x;
-            let dy = nearest.shape.y - this.shape.y;
+            let dx = this.shape.x - nearest.shape.x;
+            let dy = this.shape.y - nearest.shape.y;
+            // 単位ベクトル
+            let l = Math.sqrt(dx**2 + dy**2);
+            let udx = dx / l;
+            let udy = dy / l;
 
-            if( Math.abs(dy/dx) >= Box.sizeRateH ) {
-                this.vy *= -1;
-            }else{
-                this.vx *= -1;
+            // 内積　反射方向か
+            let dot = udx * this.vx + udy * this.vy;
+
+            if( dot < 0 ){
+                // 反射
+                this.vx += -2 * 0.90 * dot * udx;
+                this.vy += -2 * 0.90 * dot * udy;
+
+                // ダメージ〜破壊
+                nearest.applyDamage( 1 );
             }
-            // ダメージ〜破壊
-            nearest.applyDamage( 1 );
         }
-*/
+
         this.boundWall();
     }
 
     // 壁で跳ね返り
     boundWall(){
         if( (this.shape.x - Util.width*0.5)**2 > (Util.width*0.5 - this.radius)**2 ) {
-            this.vx *= -1;
-            this.vy += this.radius * 0.05;  //やや落下させて無限ループ防止
+            this.vx *= -0.90;
             this.shape.x += this.vx;
         }
         if( this.vy < 0 && this.shape.y < this.radius ) {
-            this.vy *= -1;
+            this.vy *= -0.90;
             this.shape.y += this.vy;
         }
         // 下に落ちたら消える

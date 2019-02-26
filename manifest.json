@@ -9,13 +9,14 @@
 	],
 	"game": [
 		"bin-debug/GameObject.js",
+		"bin-debug/Aiming.js",
 		"bin-debug/Background.js",
 		"bin-debug/Ball.js",
 		"bin-debug/Game.js",
 		"bin-debug/GameOver.js",
 		"bin-debug/Main.js",
-		"bin-debug/PadAim.js",
 		"bin-debug/Score.js",
+		"bin-debug/Target.js",
 		"bin-debug/Util.js"
 	]
 }

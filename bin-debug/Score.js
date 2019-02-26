@@ -29,7 +29,7 @@ var Score = (function (_super) {
     Score.prototype.update = function () {
         this.text.text = "SCORE : " + this.point.toFixed();
     };
-    Score.prototype.breakBox = function () {
+    Score.prototype.breakTarget = function () {
         this.point += 1 + this.combo;
         this.combo++;
     };

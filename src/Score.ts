@@ -26,7 +26,7 @@ class Score extends GameObject{
         this.text.text = "SCORE : " + this.point.toFixed();
     }
 
-    breakBox(){
+    breakTarget(){
         this.point += 1 + this.combo;
         this.combo++;
     }

@@ -37,59 +37,62 @@ var Ball = (function (_super) {
         this.shape.y = y;
     };
     Ball.prototype.update = function () {
+        var _this = this;
         // 移動処理
         this.shape.x += this.vx;
         this.shape.y += this.vy;
-        // BOXとの接触判定（一番近いもの）
+        this.vx *= 0.99;
+        this.vy *= 0.99;
+        this.vy += this.radius * 0.01;
+        // Targetとの接触判定（一番近いもの）
         var nearest = null;
-        var nd2 = 0;
-        /*
-                Box.boxes.forEach( box => {
-                    let dx = box.shape.x - this.shape.x;
-                    let dy = box.shape.y - this.shape.y;
-                    let dx2 = dx**2;
-                    let dy2 = dy**2;
-        
-                    if( !nearest ){
-                        let xr = box.sizeW * 0.5 + this.radius;
-                        let yr = box.sizeH * 0.5 + this.radius;
-                        if( dx2 < xr**2 && dy2 < yr**2 ){
-                            nearest = box;
-                            nd2 = dx2 + dy2;
-                        }
-                    }
-                    else{
-                        if( nd2 > dx2 + dy2 ){
-                            nearest = box;
-                            nd2 = dx2 + dy2;
-                        }
-                    }
-                });
-        
-                if( nearest ){
-                    let dx = nearest.shape.x - this.shape.x;
-                    let dy = nearest.shape.y - this.shape.y;
-        
-                    if( Math.abs(dy/dx) >= Box.sizeRateH ) {
-                        this.vy *= -1;
-                    }else{
-                        this.vx *= -1;
-                    }
-                    // ダメージ〜破壊
-                    nearest.applyDamage( 1 );
+        var ndd = 0;
+        Target.targets.forEach(function (target) {
+            var dx = target.shape.x - _this.shape.x;
+            var dy = target.shape.y - _this.shape.y;
+            var dd = Math.pow(dx, 2) + Math.pow(dy, 2);
+            if (!nearest) {
+                var rr = Math.pow((target.radius + _this.radius), 2);
+                if (dd < rr) {
+                    nearest = target;
+                    ndd = dd;
                 }
-        */
+            }
+            else {
+                if (ndd > dd) {
+                    nearest = target;
+                    ndd = dd;
+                }
+            }
+        });
+        // 反射
+        if (nearest) {
+            var dx = this.shape.x - nearest.shape.x;
+            var dy = this.shape.y - nearest.shape.y;
+            // 単位ベクトル
+            var l = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+            var udx = dx / l;
+            var udy = dy / l;
+            // 内積　反射方向か
+            var dot = udx * this.vx + udy * this.vy;
+            if (dot < 0) {
+                // 反射
+                this.vx += -2 * 0.90 * dot * udx;
+                this.vy += -2 * 0.90 * dot * udy;
+                // ダメージ〜破壊
+                nearest.applyDamage(1);
+            }
+        }
         this.boundWall();
     };
     // 壁で跳ね返り
     Ball.prototype.boundWall = function () {
         if (Math.pow((this.shape.x - Util.width * 0.5), 2) > Math.pow((Util.width * 0.5 - this.radius), 2)) {
-            this.vx *= -1;
-            this.vy += this.radius * 0.05; //やや落下させて無限ループ防止
+            this.vx *= -0.90;
             this.shape.x += this.vx;
         }
         if (this.vy < 0 && this.shape.y < this.radius) {
-            this.vy *= -1;
+            this.vy *= -0.90;
             this.shape.y += this.vy;
         }
         // 下に落ちたら消える
