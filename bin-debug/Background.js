@@ -19,6 +19,7 @@ var Background = (function (_super) {
         _this.shape.graphics.drawRect(0, 0, Util.width, Util.height);
         _this.shape.graphics.endFill();
         GameObject.display.addChild(_this.shape);
+        GameObject.display.setChildIndex(_this.shape, 1);
         return _this;
     }
     Background.prototype.update = function () { };

@@ -101,13 +101,19 @@ var Aiming = (function (_super) {
     };
     Aiming.prototype.stateWave = function () {
         Score.I.combo = 0;
-        this.generateTargets();
+        if (this.generateTargets()) {
+            new GameOver();
+        }
         this.state = this.stateAim;
     };
     Aiming.prototype.generateTargets = function () {
+        var _this = this;
+        var isGameOver = false;
         // scroll up
         Target.targets.forEach(function (target) {
             target.shape.y -= TARGET_SIZE_PER_WIDTH * Util.width * 1.25;
+            if (target.shape.y <= _this.y)
+                isGameOver = true;
         });
         // Generate new targets
         this.rowCount++;
@@ -123,6 +129,7 @@ var Aiming = (function (_super) {
             new Target(x, y, Util.randomInt(Math.max(1, maxHp * 0.33), maxHp));
             ratio += delta * Util.random(1 - 0.5, 1 + 0.5);
         }
+        return isGameOver;
     };
     Aiming.prototype.stateAim = function () {
         this.setShape();

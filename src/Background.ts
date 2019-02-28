@@ -11,6 +11,7 @@ class Background extends GameObject{
         this.shape.graphics.drawRect(0, 0, Util.width, Util.height);
         this.shape.graphics.endFill();
         GameObject.display.addChild(this.shape);
+        GameObject.display.setChildIndex( this.shape, 1 );
     }
     
     update() {}

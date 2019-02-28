@@ -105,14 +105,20 @@ class Aiming extends GameObject{
 
     stateWave(){
         Score.I.combo = 0;
-        this.generateTargets();
+        if( this.generateTargets() ) {
+            new GameOver();
+        }
         this.state = this.stateAim;
     }
 
-    generateTargets(){
+    generateTargets() : boolean {
+        let isGameOver = false;
+
         // scroll up
         Target.targets.forEach( target => {
             target.shape.y -= TARGET_SIZE_PER_WIDTH * Util.width * 1.25;
+            if( target.shape.y <= this.y )
+                isGameOver = true;
         });
 
         // Generate new targets
@@ -130,6 +136,7 @@ class Aiming extends GameObject{
             new Target( x, y, Util.randomInt( Math.max(1,maxHp * 0.33), maxHp ) );
             ratio += delta * Util.random( 1-0.5, 1+0.5 );
         }
+        return isGameOver;
     }
 
     stateAim(){
