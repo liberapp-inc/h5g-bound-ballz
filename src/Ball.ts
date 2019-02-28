@@ -71,21 +71,22 @@ class Ball extends GameObject{
         if( nearest ){
             let dx = this.shape.x - nearest.shape.x;
             let dy = this.shape.y - nearest.shape.y;
-            // 単位ベクトル
             let l = Math.sqrt(dx**2 + dy**2);
             let udx = dx / l;
             let udy = dy / l;
 
-            // 内積　反射方向か
             let dot = udx * this.vx + udy * this.vy;
-
             if( dot < 0 ){
-                // 反射
                 this.vx += -2 * 0.90 * dot * udx;
                 this.vy += -2 * 0.90 * dot * udy;
-
-                // ダメージ〜破壊
-                nearest.applyDamage( 1 );
+                let minSpeed = (this.radius * 0.2);
+                l = this.vx**2 + this.vy**2;
+                if( l < minSpeed**2 ) {
+                    l = minSpeed / Math.sqrt( l );
+                    this.vx *= l;
+                    this.vy *= l;
+                } 
+                nearest.applyDamage( 1, -udx, -udy );
             }
         }
 

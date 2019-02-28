@@ -18,7 +18,7 @@ var Score = (function (_super) {
         _this.text = null;
         Score.I = _this;
         _this.point = 0;
-        _this.text = Util.newTextField("SCORE : 0", Util.width / 18, 0x008000, 0.5, 0.0, true);
+        _this.text = Util.newTextField("SCORE : 0", Util.width / 18, 0x0080ff, 0.5, 0.0, true);
         GameObject.display.addChild(_this.text);
         return _this;
     }

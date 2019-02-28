@@ -69,18 +69,21 @@ var Ball = (function (_super) {
         if (nearest) {
             var dx = this.shape.x - nearest.shape.x;
             var dy = this.shape.y - nearest.shape.y;
-            // 単位ベクトル
             var l = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
             var udx = dx / l;
             var udy = dy / l;
-            // 内積　反射方向か
             var dot = udx * this.vx + udy * this.vy;
             if (dot < 0) {
-                // 反射
                 this.vx += -2 * 0.90 * dot * udx;
                 this.vy += -2 * 0.90 * dot * udy;
-                // ダメージ〜破壊
-                nearest.applyDamage(1);
+                var minSpeed = (this.radius * 0.2);
+                l = Math.pow(this.vx, 2) + Math.pow(this.vy, 2);
+                if (l < Math.pow(minSpeed, 2)) {
+                    l = minSpeed / Math.sqrt(l);
+                    this.vx *= l;
+                    this.vy *= l;
+                }
+                nearest.applyDamage(1, -udx, -udy);
             }
         }
         this.boundWall();

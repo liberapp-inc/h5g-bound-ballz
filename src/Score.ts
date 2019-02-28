@@ -13,7 +13,7 @@ class Score extends GameObject{
 
         Score.I = this;
         this.point = 0;
-        this.text = Util.newTextField("SCORE : 0", Util.width / 18, 0x008000, 0.5, 0.0, true);
+        this.text = Util.newTextField("SCORE : 0", Util.width / 18, 0x0080ff, 0.5, 0.0, true);
         GameObject.display.addChild( this.text );
     }
     
