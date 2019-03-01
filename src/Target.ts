@@ -4,7 +4,7 @@
 class Target extends GameObject{
 
     static targets:Target[] = [];
-    static readonly maxHp:number = 10;
+    static readonly maxHp:number = 25;
     hp:number;
     radius:number;
     readonly animFrameMax = 8;
@@ -34,19 +34,20 @@ class Target extends GameObject{
         
         this.shape = new egret.Shape();
         this.shape.graphics.beginFill(Target.getColor(this.hp));
-        this.shape.graphics.drawCircle(0, 0, radius * (1+0.3*this.animFrame/this.animFrameMax));
+        this.shape.graphics.drawCircle(0, 0, radius );
         this.shape.graphics.endFill();
         GameObject.display.addChild(this.shape);
         GameObject.display.setChildIndex(this.shape, 2);
         this.shape.x = x;
         this.shape.y = y;
     }
-    static getColor( hp:number ): number{
-        let rate = Util.clamp((hp-1) / (Target.maxHp-1), 0, 1);
-        if( rate <= 0.5 )
-            rate = Util.colorLerp( 0xf00040, 0x00f000, rate * 2 );
-        else
-            rate = Util.colorLerp( 0x00f000, 0x4000ff, rate * 2 - 1);
+    static getColor( hp:number ): number {
+        let rate = Util.clamp( (hp-1) / (Target.maxHp-1), 0, 1);
+        if( rate <= 0.5 ){
+            rate = Util.colorLerp( 0xf00040, 0xf0f000, rate * 2 );
+        }else{
+            rate = Util.colorLerp( 0xf0f000, 0x0080ff, rate * 2 - 1);
+        }
         return rate;
     }
 
@@ -57,7 +58,8 @@ class Target extends GameObject{
 
         if( this.animFrame > 0 ) {
             this.animFrame--;
-            this.setShape( this.shape.x, this.shape.y, this.radius );
+            let scale = 1 + 0.3 * this.animFrame / this.animFrameMax;
+            this.shape.scaleX = this.shape.scaleY = scale;
         }
     }
 
@@ -70,6 +72,16 @@ class Target extends GameObject{
         }else{
             Score.I.breakTarget();
             this.destroy();
+            new EffectCircle( this.shape.x, this.shape.y, this.radius );
         }
+    }
+
+    static scrollUp( dy:number ):boolean {
+        let isOver = false;
+        Target.targets.forEach( target => {
+            target.shape.y += dy;
+            if( target.shape.y <= Aiming.I.y ) isOver = true;
+        });
+        return isOver;
     }
 }

@@ -4,7 +4,6 @@
 class Ball extends GameObject{
 
     static balls:Ball[] = [];
-
     radius:number;
     vx:number;
     vy:number;
@@ -28,7 +27,7 @@ class Ball extends GameObject{
             GameObject.display.removeChild(this.shape);
         
         this.shape = new egret.Shape();
-        this.shape.graphics.beginFill(0xffc000);
+        this.shape.graphics.beginFill(0x00c0ff);
         this.shape.graphics.drawCircle(0, 0, radius);
         this.shape.graphics.endFill();
         GameObject.display.addChild(this.shape);

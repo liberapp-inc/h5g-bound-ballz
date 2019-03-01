@@ -36,7 +36,7 @@ var Target = (function (_super) {
             GameObject.display.removeChild(this.shape);
         this.shape = new egret.Shape();
         this.shape.graphics.beginFill(Target.getColor(this.hp));
-        this.shape.graphics.drawCircle(0, 0, radius * (1 + 0.3 * this.animFrame / this.animFrameMax));
+        this.shape.graphics.drawCircle(0, 0, radius);
         this.shape.graphics.endFill();
         GameObject.display.addChild(this.shape);
         GameObject.display.setChildIndex(this.shape, 2);
@@ -45,10 +45,12 @@ var Target = (function (_super) {
     };
     Target.getColor = function (hp) {
         var rate = Util.clamp((hp - 1) / (Target.maxHp - 1), 0, 1);
-        if (rate <= 0.5)
-            rate = Util.colorLerp(0xf00040, 0x00f000, rate * 2);
-        else
-            rate = Util.colorLerp(0x00f000, 0x4000ff, rate * 2 - 1);
+        if (rate <= 0.5) {
+            rate = Util.colorLerp(0xf00040, 0xf0f000, rate * 2);
+        }
+        else {
+            rate = Util.colorLerp(0xf0f000, 0x0080ff, rate * 2 - 1);
+        }
         return rate;
     };
     Target.prototype.update = function () {
@@ -57,7 +59,8 @@ var Target = (function (_super) {
         this.text.y = this.shape.y - this.text.height * 0.5;
         if (this.animFrame > 0) {
             this.animFrame--;
-            this.setShape(this.shape.x, this.shape.y, this.radius);
+            var scale = 1 + 0.3 * this.animFrame / this.animFrameMax;
+            this.shape.scaleX = this.shape.scaleY = scale;
         }
     };
     // ダメージ
@@ -70,10 +73,20 @@ var Target = (function (_super) {
         else {
             Score.I.breakTarget();
             this.destroy();
+            new EffectCircle(this.shape.x, this.shape.y, this.radius);
         }
     };
+    Target.scrollUp = function (dy) {
+        var isOver = false;
+        Target.targets.forEach(function (target) {
+            target.shape.y += dy;
+            if (target.shape.y <= Aiming.I.y)
+                isOver = true;
+        });
+        return isOver;
+    };
     Target.targets = [];
-    Target.maxHp = 10;
+    Target.maxHp = 25;
     return Target;
 }(GameObject));
 __reflect(Target.prototype, "Target");

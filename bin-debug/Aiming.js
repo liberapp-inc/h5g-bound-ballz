@@ -1,5 +1,5 @@
 // Liberapp 2019 - Tahiti Katagai
-// 狙って撃つ方向表示
+// 狙って撃つ方向表示　ゲーム展開
 var __reflect = (this && this.__reflect) || function (p, c, t) {
     p.__class__ = c, t ? t.push(c) : t = [c], p.__types__ = p.__types__ ? t.concat(p.__types__) : t;
 };
@@ -14,22 +14,21 @@ var Aiming = (function (_super) {
     __extends(Aiming, _super);
     function Aiming() {
         var _this = _super.call(this) || this;
-        _this.dir = 0; // 真下方向(0,1)を０度とするラジアン
-        _this.frame = 0;
         _this.lineColor = 0x0080ff;
-        _this.ballCount = 4;
+        _this.dir = 0; // 真下方向(0,1)を０度とするラジアン
+        _this.ballCount = 2;
         _this.interval = 0;
         _this.rowCount = 0;
         _this.state = _this.stateWave;
+        _this.step = 0;
         _this.textGuide = null;
         _this.textBalls = null;
+        Aiming.I = _this;
         _this.x = Util.width * 0.5;
         _this.y = Util.height * 0.1;
         _this.ballSpeed = BALL_RADIUS_PER_WIDTH * Util.width * 0.75;
-        for (var i = 0; i < 2; i++)
-            _this.generateTargets();
         _this.textGuide = Util.newTextField("スワイプでねらって\nボールをおとせ！", Util.width / 18, 0x0080ff, 0.5, 0.3, true);
-        _this.textBalls = Util.newTextField("x2", Util.width / 22, 0x0080ff, 0.55, 0.08, true);
+        _this.textBalls = Util.newTextField("x" + _this.ballCount, Util.width / 22, 0x0080ff, 0.55, 0.08, true);
         GameObject.display.addChild(_this.textGuide);
         GameObject.display.addChild(_this.textBalls);
         GameObject.display.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, function (e) { return _this.touchBegin(e); }, _this);
@@ -46,6 +45,11 @@ var Aiming = (function (_super) {
             GameObject.display.removeChild(this.textGuide);
             this.textGuide = null;
         }
+        if (this.textBalls) {
+            GameObject.display.removeChild(this.textBalls);
+            this.textBalls = null;
+        }
+        Aiming.I = null;
     };
     Aiming.prototype.setShape = function () {
         if (this.shape)
@@ -57,7 +61,7 @@ var Aiming = (function (_super) {
         var vx = Math.sin(this.dir) * this.ballSpeed;
         var vy = Math.cos(this.dir) * this.ballSpeed;
         var radius = BALL_RADIUS_PER_WIDTH * Util.width;
-        var rate = (this.frame & 15) / 16;
+        var rate = (this.step & 15) / 16;
         px += vx * rate;
         py += vy * rate;
         vx *= 1 - 0.01 * rate;
@@ -97,48 +101,60 @@ var Aiming = (function (_super) {
     };
     Aiming.prototype.update = function () {
         this.state();
-        this.frame++;
     };
     Aiming.prototype.stateWave = function () {
         Score.I.combo = 0;
-        if (this.generateTargets()) {
-            new GameOver();
-        }
-        this.state = this.stateAim;
-    };
-    Aiming.prototype.generateTargets = function () {
-        var _this = this;
-        var isGameOver = false;
-        // scroll up
-        Target.targets.forEach(function (target) {
-            target.shape.y -= TARGET_SIZE_PER_WIDTH * Util.width * 1.25;
-            if (target.shape.y <= _this.y)
-                isGameOver = true;
-        });
         // Generate new targets
         this.rowCount++;
-        var ratio = 0;
-        var delta = Util.clamp(1 - this.rowCount / 20, 0.5, 1.0);
-        var y = Util.height * (1 - TARGET_RADIUS_PER_WIDTH);
-        var maxHp = Math.min(this.rowCount, Target.maxHp);
-        ratio += delta * Util.random(0, 1);
+        var delta = Util.clamp(1 - this.rowCount / 30, 0.45, 1.0);
+        var y = Util.height * (1 + TARGET_RADIUS_PER_WIDTH);
+        var maxHp = Math.min(this.rowCount + 2, Target.maxHp);
+        var ratio = delta * Util.random(0, 1);
         while (true) {
             if (ratio > 1)
                 break;
             var x = Util.width * (TARGET_RADIUS_PER_WIDTH + ratio * (1 - TARGET_SIZE_PER_WIDTH));
-            new Target(x, y, Util.randomInt(Math.max(1, maxHp * 0.33), maxHp));
+            if (Util.randomInt(0, 5) != 0) {
+                new Target(x, y, Util.randomInt(Math.max(1, maxHp * 0.33), maxHp));
+            }
+            else {
+                new Item(x, y);
+            }
             ratio += delta * Util.random(1 - 0.5, 1 + 0.5);
         }
-        return isGameOver;
+        this.state = this.stateScroll;
+        this.step = 0;
+    };
+    Aiming.prototype.stateScroll = function () {
+        this.step++;
+        var frames = 30;
+        var scrollHeight = TARGET_SIZE_PER_WIDTH * Util.width * -1.25;
+        var delta = scrollHeight / frames * Math.sin(Math.PI * this.step / 30) * Math.PI / 2;
+        var isGameOver = Target.scrollUp(delta);
+        Item.scrollUp(delta);
+        if (this.step >= 30) {
+            if (isGameOver) {
+                new GameOver();
+                this.state = this.stateGameOver;
+                return;
+            }
+            if (this.rowCount < 3) {
+                this.state = this.stateWave;
+            }
+            else {
+                this.state = this.stateAim;
+            }
+        }
     };
     Aiming.prototype.stateAim = function () {
+        this.step++;
         this.setShape();
     };
     Aiming.prototype.stateBound = function () {
         this.interval++;
         // ボールを撃つ（弾数分を連射）
-        if (this.interval / 10 <= this.ballCount) {
-            if ((this.interval % 10) == 0) {
+        if (this.interval / 15 <= this.ballCount) {
+            if ((this.interval % 15) == 0) {
                 new Ball(this.x, this.y, Math.sin(this.dir) * this.ballSpeed, Math.cos(this.dir) * this.ballSpeed);
             }
         }
@@ -149,6 +165,7 @@ var Aiming = (function (_super) {
             }
         }
     };
+    Aiming.prototype.stateGameOver = function () { };
     Aiming.prototype.touchBegin = function (e) {
         if (this.state != this.stateAim)
             return;
@@ -171,9 +188,15 @@ var Aiming = (function (_super) {
         this.interval = 0;
     };
     Aiming.prototype.addBall = function () {
-        this.ballCount++;
+        if (this.ballCount < 9) {
+            this.ballCount++;
+        }
+        else {
+            Score.I.point += 1;
+        }
         this.textBalls.text = "x" + this.ballCount;
     };
+    Aiming.I = null;
     return Aiming;
 }(GameObject));
 __reflect(Aiming.prototype, "Aiming");
