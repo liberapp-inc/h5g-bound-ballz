@@ -1,5 +1,5 @@
 // Liberapp 2019 - Tahiti Katagai
-// エフェクト　○
+// エフェクト　まる　　破壊したときに表示
 
 class EffectCircle extends GameObject{
 
@@ -22,7 +22,7 @@ class EffectCircle extends GameObject{
             GameObject.display.removeChild(this.shape);
         
         this.shape = new egret.Shape();
-        this.shape.graphics.lineStyle(3 + 7*(this.frame/EffectCircle.maxFrame), this.color);
+        this.shape.graphics.lineStyle(3 + 10*(this.frame/EffectCircle.maxFrame), this.color);
         this.shape.graphics.drawCircle(0, 0, radius);
         GameObject.display.addChild(this.shape);
         this.shape.x = x;

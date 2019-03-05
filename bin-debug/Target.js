@@ -73,20 +73,26 @@ var Target = (function (_super) {
         else {
             Score.I.breakTarget();
             this.destroy();
-            new EffectCircle(this.shape.x, this.shape.y, this.radius);
+            var x = this.shape.x;
+            var y = this.shape.y;
+            var r = this.radius;
+            new EffectCircle(x, y, r);
+            for (var i = 0; i < 5; i++) {
+                var a = Util.random(-Math.PI, +Math.PI);
+                var vx = Math.sin(a);
+                var vy = Math.cos(a);
+                var radius = r * (2 + i * 0.5);
+                new EffectLine(x + vx * r, y + vy * r, vx * radius, vy * radius);
+            }
         }
     };
     Target.scrollUp = function (dy) {
-        var isOver = false;
         Target.targets.forEach(function (target) {
             target.shape.y += dy;
-            if (target.shape.y <= Aiming.I.y)
-                isOver = true;
         });
-        return isOver;
     };
     Target.targets = [];
-    Target.maxHp = 25;
+    Target.maxHp = 35;
     return Target;
 }(GameObject));
 __reflect(Target.prototype, "Target");

@@ -14,6 +14,9 @@ class GameOver extends GameObject{
         this.textScore = Util.newTextField("SCORE : " + Score.I.point.toFixed(), Util.width / 12, 0x0080ff, 0.5, 0.55, true);
         GameObject.display.addChild( this.textScore );
 
+        if( Score.I.point >= Score.I.bestScore ){
+            egret.localStorage.setItem("bestScore", Score.I.point.toFixed() ); // string
+        }
         GameObject.display.once(egret.TouchEvent.TOUCH_TAP, (e: egret.TouchEvent) => this.tap(e), this);
     }
 

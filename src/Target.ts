@@ -4,7 +4,7 @@
 class Target extends GameObject{
 
     static targets:Target[] = [];
-    static readonly maxHp:number = 25;
+    static readonly maxHp:number = 35;
     hp:number;
     radius:number;
     readonly animFrameMax = 8;
@@ -72,16 +72,30 @@ class Target extends GameObject{
         }else{
             Score.I.breakTarget();
             this.destroy();
-            new EffectCircle( this.shape.x, this.shape.y, this.radius );
+
+            let x = this.shape.x;
+            let y = this.shape.y;
+            let r = this.radius;
+            new EffectCircle( x, y, r );
+
+            for( let i=0 ; i<5 ; i++ )
+            {
+                let a = Util.random( -Math.PI, +Math.PI );
+                let vx = Math.sin( a );
+                let vy = Math.cos( a );
+                let radius = r * ( 2 + i*0.5 );
+                new EffectLine(
+                    x + vx * r,
+                    y + vy * r,
+                    vx * radius,
+                    vy * radius );
+            }
         }
     }
 
-    static scrollUp( dy:number ):boolean {
-        let isOver = false;
+    static scrollUp( dy:number ) {
         Target.targets.forEach( target => {
             target.shape.y += dy;
-            if( target.shape.y <= Aiming.I.y ) isOver = true;
         });
-        return isOver;
     }
 }

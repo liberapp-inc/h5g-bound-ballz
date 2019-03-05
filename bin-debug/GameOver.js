@@ -19,6 +19,9 @@ var GameOver = (function (_super) {
         GameObject.display.addChild(_this.textGameOver);
         _this.textScore = Util.newTextField("SCORE : " + Score.I.point.toFixed(), Util.width / 12, 0x0080ff, 0.5, 0.55, true);
         GameObject.display.addChild(_this.textScore);
+        if (Score.I.point >= Score.I.bestScore) {
+            egret.localStorage.setItem("bestScore", Score.I.point.toFixed()); // string
+        }
         GameObject.display.once(egret.TouchEvent.TOUCH_TAP, function (e) { return _this.tap(e); }, _this);
         return _this;
     }

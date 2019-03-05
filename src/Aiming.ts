@@ -11,11 +11,13 @@ class Aiming extends GameObject{
 
     readonly lineColor:number = 0x0080ff;
     dir:number = 0;     // 真下方向(0,1)を０度とするラジアン
+    readonly ballMax:number = 9;
     ballCount:number = 2;
     interval:number = 0;
     rowCount:number = 0;
     state:()=>void = this.stateWave;
     step:number = 0;
+    shapeLine:egret.Shape = null;
     textGuide:egret.TextField = null;
     textBalls:egret.TextField = null;
 
@@ -27,8 +29,19 @@ class Aiming extends GameObject{
         this.y = Util.height * 0.1;
         this.ballSpeed = BALL_RADIUS_PER_WIDTH * Util.width * 0.75;
 
+        this.shapeLine = new egret.Shape();
+        this.shapeLine.graphics.beginFill(0x00c0ff);
+        this.shapeLine.graphics.drawCircle( this.x, this.y, BALL_RADIUS_PER_WIDTH * Util.width * 0.75);
+        this.shapeLine.graphics.endFill();
+        this.shapeLine.graphics.lineStyle(5, 0x808090);
+        this.shapeLine.graphics.moveTo( 0, this.y );
+        this.shapeLine.graphics.lineTo( Util.width * 0.45, this.y );
+        this.shapeLine.graphics.moveTo( Util.width * 0.55, this.y );
+        this.shapeLine.graphics.lineTo( Util.width, this.y );
+        GameObject.display.addChild(this.shapeLine);
+
         this.textGuide = Util.newTextField("スワイプでねらって\nボールをおとせ！", Util.width / 18, 0x0080ff, 0.5, 0.3, true);
-        this.textBalls = Util.newTextField("x"+this.ballCount, Util.width / 22, 0x0080ff, 0.55, 0.08, true);
+        this.textBalls = Util.newTextField("x"+this.ballCount, Util.width / 22, 0x0080ff, 0.55, 0.06, true);
         GameObject.display.addChild(this.textGuide);
         GameObject.display.addChild(this.textBalls);
 
@@ -41,6 +54,10 @@ class Aiming extends GameObject{
         GameObject.display.stage.removeEventListener(egret.TouchEvent.TOUCH_BEGIN, (e: egret.TouchEvent) => this.touchBegin(e), this);
         GameObject.display.stage.removeEventListener(egret.TouchEvent.TOUCH_MOVE, (e: egret.TouchEvent) => this.touchMove(e), this);
         GameObject.display.stage.removeEventListener(egret.TouchEvent.TOUCH_END, (e: egret.TouchEvent) => this.touchEnd(e), this);
+        if( this.shapeLine ){
+            GameObject.display.removeChild(this.shapeLine);
+            this.shapeLine = null;
+        }
         if( this.textGuide ){
             GameObject.display.removeChild(this.textGuide);
             this.textGuide = null;
@@ -114,17 +131,15 @@ class Aiming extends GameObject{
         // Generate new targets
         this.rowCount++;
         let delta = Util.clamp( 1 - this.rowCount / 30, 0.45, 1.0 );
-        let y = Util.height * (1+TARGET_RADIUS_PER_WIDTH);
-        let maxHp = Math.min( this.rowCount + 2, Target.maxHp );
+        let y = Util.height + TARGET_RADIUS_PER_WIDTH * Util.width;
+        let maxHp = Math.min( this.rowCount, Target.maxHp );
         let ratio = delta * Util.random( 0, 1 );
-        while( true ){
-            if( ratio > 1 )
-                break;
+        while( ratio < 1 ){
             let x = Util.width * ( TARGET_RADIUS_PER_WIDTH + ratio * (1 - TARGET_SIZE_PER_WIDTH) );
-            if( Util.randomInt(0, 5) != 0 ){
-                new Target( x, y, Util.randomInt( Math.max(1,maxHp * 0.33), maxHp ) );
-            }else{
+            if( this.ballCount < this.ballMax && Util.randomInt(0, 3) == 2 ){
                 new Item( x, y );
+            }else{
+                new Target( x, y, Util.randomInt( Math.max(1,maxHp * 0.33), maxHp ) );
             }
             ratio += delta * Util.random( 1-0.5, 1+0.5 );
         }
@@ -138,16 +153,20 @@ class Aiming extends GameObject{
         const scrollHeight = TARGET_SIZE_PER_WIDTH * Util.width * -1.25;
         const delta = scrollHeight / frames * Math.sin(Math.PI * this.step/30) * Math.PI/2;
 
-        let isGameOver = 
         Target.scrollUp( delta );
         Item.scrollUp( delta );
 
         if( this.step >= 30 ) {
-            if( isGameOver ){
+            let isOver = false;
+            Target.targets.forEach( target => {
+                if( target.shape.y - target.radius < Aiming.I.y ) isOver = true;
+            });
+            if( isOver ){
                 new GameOver();
                 this.state = this.stateGameOver;
                 return;
             }
+
             if( this.rowCount < 3 ) {
                 this.state = this.stateWave;
             }else{
@@ -206,7 +225,7 @@ class Aiming extends GameObject{
     }
 
     addBall(){
-        if( this.ballCount < 9 ){
+        if( this.ballCount < this.ballMax ){
             this.ballCount++;
         }else{
             Score.I.point += 1;
