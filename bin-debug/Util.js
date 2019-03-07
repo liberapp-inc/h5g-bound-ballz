@@ -14,7 +14,9 @@ var Util = (function () {
         return min + Math.random() * (max - min);
     };
     Util.randomInt = function (min, max) {
-        return Math.floor(min + Math.random() * (max + 0.999 - min));
+        min = Math.floor(min);
+        max = Math.floor(max) + 0.999;
+        return Math.floor(min + Math.random() * (max - min));
     };
     Util.clamp = function (value, min, max) {
         if (value < min)

@@ -4,7 +4,7 @@
 class Target extends GameObject{
 
     static targets:Target[] = [];
-    static readonly maxHp:number = 35;
+    static readonly maxHp:number = 32;
     hp:number;
     radius:number;
     readonly animFrameMax = 8;
@@ -29,17 +29,18 @@ class Target extends GameObject{
     }
 
     setShape(x:number, y:number, radius:number){
-        if( this.shape )
-            GameObject.display.removeChild(this.shape);
-        
-        this.shape = new egret.Shape();
+        if( this.shape == null ){
+            this.shape = new egret.Shape();
+            GameObject.display.addChild(this.shape);
+            GameObject.display.setChildIndex(this.shape, 2);
+        }else{
+            this.shape.graphics.clear();
+        }
+        this.shape.x = x;
+        this.shape.y = y;
         this.shape.graphics.beginFill(Target.getColor(this.hp));
         this.shape.graphics.drawCircle(0, 0, radius );
         this.shape.graphics.endFill();
-        GameObject.display.addChild(this.shape);
-        GameObject.display.setChildIndex(this.shape, 2);
-        this.shape.x = x;
-        this.shape.y = y;
     }
     static getColor( hp:number ): number {
         let rate = Util.clamp( (hp-1) / (Target.maxHp-1), 0, 1);
@@ -78,18 +79,18 @@ class Target extends GameObject{
             let r = this.radius;
             new EffectCircle( x, y, r );
 
-            for( let i=0 ; i<5 ; i++ )
-            {
-                let a = Util.random( -Math.PI, +Math.PI );
-                let vx = Math.sin( a );
-                let vy = Math.cos( a );
-                let radius = r * ( 2 + i*0.5 );
-                new EffectLine(
-                    x + vx * r,
-                    y + vy * r,
-                    vx * radius,
-                    vy * radius );
-            }
+            // for( let i=0 ; i<3 ; i++ )
+            // {
+            //     let a = Util.random( -Math.PI, +Math.PI );
+            //     let vx = Math.sin( a );
+            //     let vy = Math.cos( a );
+            //     let radius = r * ( 2 + i*0.5 );
+            //     new EffectLine(
+            //         x + vx * r,
+            //         y + vy * r,
+            //         vx * radius,
+            //         vy * radius );
+            // }
         }
     }
 

@@ -18,15 +18,16 @@ class EffectCircle extends GameObject{
     }
 
     setShape(x:number, y:number, radius:number){
-        if( this.shape )
-            GameObject.display.removeChild(this.shape);
-        
-        this.shape = new egret.Shape();
-        this.shape.graphics.lineStyle(3 + 10*(this.frame/EffectCircle.maxFrame), this.color);
-        this.shape.graphics.drawCircle(0, 0, radius);
-        GameObject.display.addChild(this.shape);
+        if( this.shape == null ){
+            this.shape = new egret.Shape();
+            GameObject.display.addChild(this.shape);
+        }else{
+            this.shape.graphics.clear();
+        }
         this.shape.x = x;
         this.shape.y = y;
+        this.shape.graphics.lineStyle(3 + 10*(this.frame/EffectCircle.maxFrame), this.color);
+        this.shape.graphics.drawCircle(0, 0, radius);
     }
 
     update() {

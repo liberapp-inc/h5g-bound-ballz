@@ -1,5 +1,4 @@
 // Liberapp 2019 - Tahiti Katagai
-// 背景表示
 
 class Background extends GameObject{
 

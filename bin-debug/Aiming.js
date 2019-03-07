@@ -43,6 +43,7 @@ var Aiming = (function (_super) {
         _this.textBalls = Util.newTextField("x" + _this.ballCount, Util.width / 22, 0x0080ff, 0.55, 0.06, true);
         GameObject.display.addChild(_this.textGuide);
         GameObject.display.addChild(_this.textBalls);
+        GameObject.display.stage.addEventListener(egret.TouchEvent.TOUCH_TAP, function () { return _this.onTapToStart(); }, _this);
         GameObject.display.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, function (e) { return _this.touchBegin(e); }, _this);
         GameObject.display.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, function (e) { return _this.touchMove(e); }, _this);
         GameObject.display.stage.addEventListener(egret.TouchEvent.TOUCH_END, function (e) { return _this.touchEnd(e); }, _this);
@@ -50,6 +51,7 @@ var Aiming = (function (_super) {
     }
     Aiming.prototype.onDestroy = function () {
         var _this = this;
+        GameObject.display.stage.removeEventListener(egret.TouchEvent.TOUCH_TAP, function () { return _this.onTapToStart(); }, this);
         GameObject.display.stage.removeEventListener(egret.TouchEvent.TOUCH_BEGIN, function (e) { return _this.touchBegin(e); }, this);
         GameObject.display.stage.removeEventListener(egret.TouchEvent.TOUCH_MOVE, function (e) { return _this.touchMove(e); }, this);
         GameObject.display.stage.removeEventListener(egret.TouchEvent.TOUCH_END, function (e) { return _this.touchEnd(e); }, this);
@@ -68,22 +70,26 @@ var Aiming = (function (_super) {
         Aiming.I = null;
     };
     Aiming.prototype.setShape = function () {
-        if (this.shape)
-            GameObject.display.removeChild(this.shape);
-        // 点線
-        this.shape = new egret.Shape();
+        if (this.shape == null) {
+            this.shape = new egret.Shape();
+            GameObject.display.addChild(this.shape);
+        }
+        else {
+            this.shape.graphics.clear();
+        }
+        // 点線 dot line
+        var rate = (this.step & 15) / 16;
         var px = this.x;
         var py = this.y;
         var vx = Math.sin(this.dir) * this.ballSpeed;
         var vy = Math.cos(this.dir) * this.ballSpeed;
         var radius = BALL_RADIUS_PER_WIDTH * Util.width;
-        var rate = (this.step & 15) / 16;
+        this.shape.graphics.lineStyle(5 * rate, this.lineColor);
         px += vx * rate;
         py += vy * rate;
         vx *= 1 - 0.01 * rate;
         vy *= 1 - 0.01 * rate;
         vy += radius * 0.01 * rate;
-        this.shape.graphics.lineStyle(5 * rate, this.lineColor);
         this.shape.graphics.drawCircle(px, py, radius * 0.02);
         this.shape.graphics.lineStyle(5, this.lineColor);
         for (var i = 0; i < 20; i++) {
@@ -94,14 +100,13 @@ var Aiming = (function (_super) {
             vy += radius * 0.01;
             this.shape.graphics.drawCircle(px, py, radius * 0.02);
         }
+        this.shape.graphics.lineStyle(5 * (1 - rate), this.lineColor);
         px += vx;
         py += vy;
         vx *= 0.99;
         vy *= 0.99;
         vy += radius * 0.01;
-        this.shape.graphics.lineStyle(5 * (1 - rate), this.lineColor);
         this.shape.graphics.drawCircle(px, py, radius * 0.02);
-        GameObject.display.addChild(this.shape);
     };
     Aiming.prototype.setDir = function (x, y) {
         // ボールを撃つ方向　ライン表示
@@ -118,13 +123,14 @@ var Aiming = (function (_super) {
     Aiming.prototype.update = function () {
         this.state();
     };
+    Aiming.prototype.stateNone = function () { };
     Aiming.prototype.stateWave = function () {
         Score.I.combo = 0;
-        // Generate new targets
+        // ターゲット生成 Generate new targets
         this.rowCount++;
         var delta = Util.clamp(1 - this.rowCount / 30, 0.45, 1.0);
         var y = Util.height + TARGET_RADIUS_PER_WIDTH * Util.width;
-        var maxHp = Math.min(this.rowCount, Target.maxHp);
+        var maxHp = Math.min(this.rowCount * 0.75 + 1, Target.maxHp);
         var ratio = delta * Util.random(0, 1);
         while (ratio < 1) {
             var x = Util.width * (TARGET_RADIUS_PER_WIDTH + ratio * (1 - TARGET_SIZE_PER_WIDTH));
@@ -154,11 +160,14 @@ var Aiming = (function (_super) {
             });
             if (isOver_1) {
                 new GameOver();
-                this.state = this.stateGameOver;
+                this.state = this.stateNone;
                 return;
             }
             if (this.rowCount < 3) {
                 this.state = this.stateWave;
+            }
+            else if (this.textGuide) {
+                this.state = this.stateNone;
             }
             else {
                 this.state = this.stateAim;
@@ -184,15 +193,17 @@ var Aiming = (function (_super) {
             }
         }
     };
-    Aiming.prototype.stateGameOver = function () { };
+    Aiming.prototype.onTapToStart = function () {
+        if (this.textGuide) {
+            GameObject.display.removeChild(this.textGuide);
+            this.textGuide = null;
+            this.state = this.stateAim;
+        }
+    };
     Aiming.prototype.touchBegin = function (e) {
         if (this.state != this.stateAim)
             return;
         this.setDir(e.localX, e.localY);
-        if (this.textGuide) {
-            GameObject.display.removeChild(this.textGuide);
-            this.textGuide = null;
-        }
     };
     Aiming.prototype.touchMove = function (e) {
         if (this.state != this.stateAim)

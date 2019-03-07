@@ -16,7 +16,9 @@ class Util{
     }
 
     static randomInt(min:number, max:number):number {
-        return Math.floor( min + Math.random() * (max+0.999 - min) );
+        min = Math.floor(min);
+        max = Math.floor(max)+0.999;
+        return Math.floor( min + Math.random() * (max - min) );
     }
 
     static clamp(value:number, min:number, max:number):number {

@@ -1,5 +1,5 @@
 // Liberapp 2019 - Tahiti Katagai
-// アイテム
+// アイテム　ボールが増える
 
 class Item extends GameObject{
 

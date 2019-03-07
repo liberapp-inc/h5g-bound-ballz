@@ -1,5 +1,5 @@
 // Liberapp 2019 - Tahiti Katagai
-// エフェクト　○
+// エフェクト　- 線　破壊した時に表示
 
 class EffectLine extends GameObject{
 
@@ -23,16 +23,18 @@ class EffectLine extends GameObject{
     }
 
     setShape( rate:number ){
-        if( this.shape )
-            GameObject.display.removeChild(this.shape);
-        
-        let rateS  = Math.sin(rate * Math.PI * 0.5);
-        let rateD  = 1 - Math.cos(rate * Math.PI * 0.5);
-        this.shape = new egret.Shape();
-        this.shape.graphics.lineStyle(3 + 10*(1-rate), this.color);
+        if( this.shape == null ){
+            this.shape = new egret.Shape();
+            GameObject.display.addChild(this.shape);
+        }else{
+            this.shape.graphics.clear();
+        }
+        rate = rate * Math.PI * 0.5;
+        let rateS = Math.sin(rate);
+        let rateD = 1 - Math.cos(rate);
+        this.shape.graphics.lineStyle(10, this.color);
         this.shape.graphics.moveTo(this.x+this.vx*rateS, this.y+this.vy*rateS);
         this.shape.graphics.lineTo(this.x+this.vx*rateD, this.y+this.vy*rateD);
-        GameObject.display.addChild(this.shape);
     }
 
     update() {
