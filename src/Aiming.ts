@@ -16,7 +16,7 @@ class Aiming extends GameObject{
     interval:number = 0;
     rowCount:number = 0;
     state:()=>void = this.stateWave;
-    step:number = 0;
+    step:number = 60*2;
     shapeLine:egret.Shape = null;
     textGuide:egret.TextField = null;
     textBalls:egret.TextField = null;
@@ -134,6 +134,11 @@ class Aiming extends GameObject{
     stateNone(){}
 
     stateWave(){
+        if( this.step > 0 ){
+            this.step--;
+            return;
+        }
+
         Score.I.combo = 0;
         
         // ターゲット生成 Generate new targets
@@ -177,6 +182,7 @@ class Aiming extends GameObject{
 
             if( this.rowCount < 3 ) {
                 this.state = this.stateWave;
+                this.step = 0;
             }else if( this.textGuide ){
                 this.state = this.stateNone;
             }else{
@@ -202,6 +208,7 @@ class Aiming extends GameObject{
             // すべてのボールが消えたら次へ
             if( Ball.balls.length == 0 ) {
                 this.state = this.stateWave;
+                this.step = 0;
             }
         }
     }
@@ -210,7 +217,6 @@ class Aiming extends GameObject{
         if( this.textGuide ){
             GameObject.display.removeChild(this.textGuide);
             this.textGuide = null;
-            this.state = this.stateAim;
         }
     }
 

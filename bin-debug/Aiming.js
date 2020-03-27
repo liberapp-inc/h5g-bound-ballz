@@ -21,7 +21,7 @@ var Aiming = (function (_super) {
         _this.interval = 0;
         _this.rowCount = 0;
         _this.state = _this.stateWave;
-        _this.step = 0;
+        _this.step = 60 * 2;
         _this.shapeLine = null;
         _this.textGuide = null;
         _this.textBalls = null;
@@ -125,6 +125,10 @@ var Aiming = (function (_super) {
     };
     Aiming.prototype.stateNone = function () { };
     Aiming.prototype.stateWave = function () {
+        if (this.step > 0) {
+            this.step--;
+            return;
+        }
         Score.I.combo = 0;
         // ターゲット生成 Generate new targets
         this.rowCount++;
@@ -165,6 +169,7 @@ var Aiming = (function (_super) {
             }
             if (this.rowCount < 3) {
                 this.state = this.stateWave;
+                this.step = 0;
             }
             else if (this.textGuide) {
                 this.state = this.stateNone;
@@ -190,6 +195,7 @@ var Aiming = (function (_super) {
             // すべてのボールが消えたら次へ
             if (Ball.balls.length == 0) {
                 this.state = this.stateWave;
+                this.step = 0;
             }
         }
     };
@@ -197,7 +203,7 @@ var Aiming = (function (_super) {
         if (this.textGuide) {
             GameObject.display.removeChild(this.textGuide);
             this.textGuide = null;
-            this.state = this.stateAim;
+            // this.state = this.stateAim;
         }
     };
     Aiming.prototype.touchBegin = function (e) {
