@@ -203,7 +203,8 @@ var Aiming = (function (_super) {
         if (this.textGuide) {
             GameObject.display.removeChild(this.textGuide);
             this.textGuide = null;
-            // this.state = this.stateAim;
+            if (this.state == this.stateNone)
+                this.state = this.stateAim;
         }
     };
     Aiming.prototype.touchBegin = function (e) {
@@ -228,7 +229,7 @@ var Aiming = (function (_super) {
             this.ballCount++;
         }
         else {
-            Score.I.point += 1;
+            Score.I.addPoint(1);
         }
         this.textBalls.text = "x" + this.ballCount;
     };

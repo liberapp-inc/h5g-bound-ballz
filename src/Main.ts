@@ -1,6 +1,8 @@
 // Bound Ballz
 // Liberapp 2019 - Tahiti Katagai
 
+const SDK = true;
+
 class Main extends eui.UILayer {
 
     public constructor() {
@@ -8,11 +10,15 @@ class Main extends eui.UILayer {
         this.once(egret.Event.ADDED_TO_STAGE, this.addToStage, this);
     }
  
-    private addToStage() {
+    private async addToStage() {
         GameObject.initial( this.stage );
         Util.init( this );
+
+        if( SDK ){
+            await Social.init();
+        }
+
         Game.loadSceneGamePlay();
-        // this.addEventListener(egret.Event.ENTER_FRAME,GameObject.process,this);
         egret.startTick(this.tickLoop, this);
     }
 

@@ -13,23 +13,32 @@ var GameOver = (function (_super) {
     __extends(GameOver, _super);
     function GameOver() {
         var _this = _super.call(this) || this;
-        _this.textGameOver = null;
-        _this.textScore = null;
-        _this.textGameOver = Util.newTextField("GAME OVER", Util.width / 10, 0x0080ff, 0.5, 0.45, true);
-        GameObject.display.addChild(_this.textGameOver);
-        _this.textScore = Util.newTextField("SCORE : " + Score.I.point.toFixed(), Util.width / 12, 0x0080ff, 0.5, 0.55, true);
-        GameObject.display.addChild(_this.textScore);
-        if (Score.I.point >= Score.I.bestScore) {
-            egret.localStorage.setItem("bestScore", Score.I.point.toFixed()); // string
+        _this.texts = [];
+        _this.texts[0] = Util.newTextField("GAME OVER", Util.width / 10, 0x0080ff, 0.5, 0.45, true);
+        GameObject.display.addChild(_this.texts[0]);
+        _this.texts[1] = Util.newTextField("SCORE : " + Score.I.point.toFixed(), Util.width / 12, 0x0080ff, 0.5, 0.55, true);
+        GameObject.display.addChild(_this.texts[1]);
+        if (SDK) {
+            if (Score.bestScore < Score.I.point) {
+                Score.bestScore = Score.I.point;
+                Social.setScore(Score.I.point);
+                _this.texts[3] = Util.newTextField("NEW RECORD!", Util.width / 13, 0x0080ff, 0.5, 0.4, true);
+                egret.Tween.get(_this.texts[3], { loop: true })
+                    .to({ alpha: 0 }, 500)
+                    .to({ alpha: 1 }, 500);
+                GameObject.display.addChild(_this.texts[3]);
+            }
         }
+        _this.texts.forEach(function (text) {
+            GameObject.display.addChild(text);
+        });
         GameObject.display.once(egret.TouchEvent.TOUCH_TAP, function (e) { return _this.tap(e); }, _this);
         return _this;
     }
     GameOver.prototype.onDestroy = function () {
-        GameObject.display.removeChild(this.textGameOver);
-        this.textGameOver = null;
-        GameObject.display.removeChild(this.textScore);
-        this.textScore = null;
+        this.texts.forEach(function (text) {
+            GameObject.display.removeChild(text);
+        });
     };
     GameOver.prototype.update = function () { };
     GameOver.prototype.tap = function (e) {

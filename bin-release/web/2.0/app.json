@@ -1,0 +1,21 @@
+{
+  "title": "スーパーボールＺ Bound Ballz",
+  "lead": "スワイプでねらって、スーパーボールを落とせ！",
+  "description": "スワイプでねらって、スーパーボールを落とせ！下からあがってくるターゲットたちを打ち壊すんだ。画面の上までターゲットが来てしまうとゲームオーバー",
+
+  "useLeaderboard": true,
+  "sdkVersion": "0.9",
+  "leaderboards": [
+    {
+      "name": "default",
+      "displayName": "ハイスコア",
+      "sortOrder": "HIGHER_IS_BETTER",
+      "scoreType": "CUSTOM",
+      "unit": "pt",
+      "decimalOffset": 0
+    }
+  ],
+  
+  "author": "Liberapp",
+  "copyright": "Liberapp. Created by Tahiti Katagai"
+}

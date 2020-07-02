@@ -217,6 +217,8 @@ class Aiming extends GameObject{
         if( this.textGuide ){
             GameObject.display.removeChild(this.textGuide);
             this.textGuide = null;
+            if( this.state == this.stateNone )
+                this.state = this.stateAim;
         }
     }
 
@@ -245,7 +247,7 @@ class Aiming extends GameObject{
         if( this.ballCount < this.ballMax ){
             this.ballCount++;
         }else{
-            Score.I.point += 1;
+            Score.I.addPoint( 1 );
         }
         this.textBalls.text = "x" + this.ballCount;
     }

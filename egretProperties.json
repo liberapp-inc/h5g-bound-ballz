@@ -21,5 +21,10 @@
     {
       "name": "promise"
     }
-  ]
+  ],
+  "urlParams": {
+      "t": "aba91e30-5e85-11ea-b91e-433c8182f6d6",
+      "u": "7739282a-9b54-4a0e-a8cb-d71609888fcb",
+      "a": "e4bffed3-af81-4deb-b7cc-b3aa5750cb4c"
+  }  
 }

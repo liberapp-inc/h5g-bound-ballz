@@ -9,17 +9,20 @@
 	],
 	"game": [
 		"bin-debug/GameObject.js",
-		"bin-debug/Aiming.js",
+		"bin-debug/Item.js",
 		"bin-debug/Ball.js",
 		"bin-debug/EffectCircle.js",
 		"bin-debug/EffectLine.js",
 		"bin-debug/Game.js",
-		"bin-debug/Background.js",
+		"bin-debug/Aiming.js",
 		"bin-debug/GameOver.js",
-		"bin-debug/Item.js",
+		"bin-debug/Background.js",
 		"bin-debug/Main.js",
 		"bin-debug/Score.js",
 		"bin-debug/Target.js",
-		"bin-debug/Util.js"
+		"bin-debug/Util.js",
+		"bin-debug/system/Sdk.js",
+		"bin-debug/system/Social.js",
+		"bin-debug/system/Toast.js"
 	]
 }
